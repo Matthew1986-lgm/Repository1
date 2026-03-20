@@ -1,3 +1,9 @@
+#Importing numpy, pandas, file
 import pandas as pd
 import numpy as np
 #df = pd.read_csv('[DataSheetFileName.csv]') #not actual name of csv
+#importing graphing and modeling functions
+from matplotlib.pyplot import subplots
+import sklearn.model_selection as skm
+from ISLP import load_data, confusion_table
+from ISLP.models import ModelSpec as MS
