@@ -18,7 +18,23 @@ from sklearn.ensemble import \
       GradientBoostingRegressor as GBR)
 from ISLP.bart import BART
 df = df.drop(columns=["PLAYER","TEAM","POS"]) #Dropping string values
-model = MS(df.columns.drop('ProBowl'), intercept=False) #creating target value as ProBowl
+pb = np.where(df.ProBowl == "Yes","Yes","No") #Create target value
+model = MS(df.columns.drop('ProBowl'), intercept=False)
 D = model.fit_transform(df)
 feature_names = list(D.columns)
 X = np.asarray(D)
+clf = DTC(criterion='entropy', #Determining best tree
+          max_depth=3,
+          random_state=1986)        
+clf.fit(X, pb)
+accuracy_score(great, clf.predict(X)) #Accuracy
+ax = subplots(figsize=(12,12))[1]
+plot_tree(clf,
+          feature_names=feature_names,
+          ax=ax); #Plot a decision tree
+validation = skm.ShuffleSplit(n_splits=1,test_size=300,random_state=0)
+
+results = skm.cross_validate(clf,D,pb,cv=validation)
+
+results['test_score'] #Validation
+(X_train, X_test, y_train, y_test) = skm.train_test_split(X, pb, test_size=0.5, random_state=1029)
