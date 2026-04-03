@@ -7,3 +7,18 @@ from matplotlib.pyplot import subplots
 import sklearn.model_selection as skm
 from ISLP import load_data, confusion_table
 from ISLP.models import ModelSpec as MS
+from sklearn.tree import (DecisionTreeClassifier as DTC,
+                          DecisionTreeRegressor as DTR,
+                          plot_tree,
+                          export_text)
+from sklearn.metrics import (accuracy_score,
+                             log_loss)
+from sklearn.ensemble import \
+     (RandomForestRegressor as RF,
+      GradientBoostingRegressor as GBR)
+from ISLP.bart import BART
+df = df.drop(columns=["PLAYER","TEAM","POS"]) #Dropping string values
+model = MS(df.columns.drop('ProBowl'), intercept=False) #creating target value as ProBowl
+D = model.fit_transform(df)
+feature_names = list(D.columns)
+X = np.asarray(D)
