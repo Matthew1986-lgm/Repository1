@@ -16,25 +16,38 @@ from sklearn.metrics import (accuracy_score,
 from sklearn.ensemble import \
      (RandomForestRegressor as RF,
       GradientBoostingRegressor as GBR)
-from ISLP.bart import BART
-df = df.drop(columns=["PLAYER","TEAM","POS"]) #Dropping string values
-pb = np.where(df.ProBowl == "Yes","Yes","No") #Create target value
-model = MS(df.columns.drop('ProBowl'), intercept=False)
-D = model.fit_transform(df)
-feature_names = list(D.columns)
-X = np.asarray(D)
-clf = DTC(criterion='entropy', #Determining best tree
-          max_depth=3,
-          random_state=1986)        
-clf.fit(X, pb)
-accuracy_score(great, clf.predict(X)) #Accuracy
-ax = subplots(figsize=(12,12))[1]
-plot_tree(clf,
+#importing the nesscary functions to build the models
+df = df.drop(columns=["PLAYER","TEAM","POS, YEAR"]) #Dropping string values (While year is a quantitave value, the year is not correlated with the target variable)
+pb = np.where(df.ProBowl == "Yes",1,0) #Create target value
+(X_train,
+ X_test,
+ y_train,
+ y_test) = skm.train_test_split(df,
+                                   pb,
+                                   test_size=1,
+                                   random_state=1986)
+clf = DTC(criterion='entropy', random_state=0) #Creating decision tree
+clf.fit(X_train, y_train)
+accuracy_score(y_test, clf.predict(X_test))
+ccp_path = clf.cost_complexity_pruning_path(X_train, y_train)
+kfold = skm.KFold(10,
+                  random_state=1,
+                  shuffle=True)
+ax = subplots(figsize=(12, 12))[1]
+best_ = grid.best_estimator_
+plot_tree(best_,
           feature_names=feature_names,
-          ax=ax); #Plot a decision tree
-validation = skm.ShuffleSplit(n_splits=1,test_size=300,random_state=0)
+          ax=ax);
+best_.tree_.n_leaves #Printing the decision tree and printing the best number of leaves of a tree
 
-results = skm.cross_validate(clf,D,pb,cv=validation)
-
-results['test_score'] #Validation
-(X_train, X_test, y_train, y_test) = skm.train_test_split(X, pb, test_size=0.5, random_state=1029)
+bag_df = RF(max_features=X_train.shape[1], n_estimators = 5000, random_state=0)
+bag_df.fit(X_train, y_train) #Creating random forest model
+feature_imp = pd.DataFrame(
+    {'importance':bag_df.feature_importances_},
+    index=feature_names)
+feature_imp.sort_values(by='importance', ascending=False) #Printing importance values
+print(accuracy_score(y_train,
+                     best_.predict(X_train)))
+confusion = confusion_table(best_.predict(X_train),
+                            y_train)
+confusion #Printing confusion table for random forest model
